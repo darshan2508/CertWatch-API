@@ -14,14 +14,13 @@ import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
-@Table(name="tbl_certificates")
+@Table(name="tbl_deleted_certificates")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CertificateEntity {
+public class DeletedCertificateEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDate date;
 
@@ -49,8 +48,4 @@ public class CertificateEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_id", nullable = false)
     private ProfileEntity profile;
-
-    @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false)
-    private CategoryEntity category;
 }

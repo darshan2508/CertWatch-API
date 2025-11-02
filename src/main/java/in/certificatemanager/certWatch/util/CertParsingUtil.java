@@ -22,12 +22,12 @@ public class CertParsingUtil {
                // Extracting issuer details from the certificate and storing it in string format
                String issuerStr = certificate.getIssuerX500Principal().getName(X500Principal.RFC2253);
                // Extracting serial number details from the certificate
-               BigInteger serialNumber = certificate.getSerialNumber();
+               String serialNumber = certificate.getSerialNumber().toString();
 
                return DetailsDTO.builder()
                        .subject(subjectStr)
                        .issuer(issuerStr)
-                       .serialNumber(certificate.getSerialNumber())
+                       .serialNumber(certificate.getSerialNumber().toString())
                        .version(certificate.getVersion())
                        .validFrom(certificate.getNotBefore())
                        .validTo(certificate.getNotAfter())

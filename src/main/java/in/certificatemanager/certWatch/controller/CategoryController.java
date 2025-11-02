@@ -34,4 +34,11 @@ public class CategoryController {
         return ResponseEntity.ok(updatedCategory);
     }
 
+    @DeleteMapping("/{categoryId}")
+    public ResponseEntity<String> deleteCategory(@PathVariable Long categoryId){
+        boolean verdict = categoryService.deleteCategory(categoryId);
+        if(verdict) return ResponseEntity.ok("Category deleted successfully.");
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("One or more certificates in this category exists. Please delete them first.");
+    }
+
 }

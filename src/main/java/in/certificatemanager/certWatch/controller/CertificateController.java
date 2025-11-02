@@ -1,5 +1,6 @@
 package in.certificatemanager.certWatch.controller;
 
+import in.certificatemanager.certWatch.dto.CategoryDTO;
 import in.certificatemanager.certWatch.dto.CertificateDTO;
 import in.certificatemanager.certWatch.dto.DetailsDTO;
 import in.certificatemanager.certWatch.service.CertificateService;
@@ -8,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,16 +37,22 @@ public class CertificateController {
         }
     }
 
-//    @GetMapping
-//    public ResponseEntity<List<CertificateDTO>> getCertificates(){
-//        List<CertificateDTO> certs = certificateService.getAllCertificatesForCurrentUser();
-//        return ResponseEntity.ok(certs);
-//    }
+    @GetMapping
+    public ResponseEntity<List<CertificateDTO>> getCertificates(){
+        List<CertificateDTO> certs = certificateService.getAllCertificatesForCurrentUser();
+        return ResponseEntity.ok(certs);
+    }
 
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<Void> deleteCertificate(){
-//        certificateService.deleteCertificate(id);
-//        return ResponseEntity.noContent().build();
-//    }
+    @PutMapping("/{certificateId}")
+    public ResponseEntity<CertificateDTO> updateCategory(@PathVariable Long certificateId, @RequestBody CertificateDTO certificateDto){
+        CertificateDTO updatedCertificate = certificateService.updateCertificate(certificateId, certificateDto);
+        return ResponseEntity.ok(updatedCertificate);
+    }
+
+    @DeleteMapping("/{certificateId}")
+    public ResponseEntity<Void> deleteCertificate(@PathVariable Long certificateId){
+        certificateService.deleteCertificate(certificateId);
+        return ResponseEntity.noContent().build();
+    }
 
 }

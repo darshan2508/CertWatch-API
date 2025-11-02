@@ -2,8 +2,10 @@ package in.certificatemanager.certWatch.service;
 
 import in.certificatemanager.certWatch.dto.CategoryDTO;
 import in.certificatemanager.certWatch.entity.CategoryEntity;
+import in.certificatemanager.certWatch.entity.CertificateEntity;
 import in.certificatemanager.certWatch.entity.ProfileEntity;
 import in.certificatemanager.certWatch.repository.CategoryRepository;
+import in.certificatemanager.certWatch.repository.CertificateRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,7 @@ public class CategoryService {
 
     private final ProfileService profileService;
     private final CategoryRepository categoryRepository;
+    private final CertificateRepository certificateRepository;
 
     // save category
     public CategoryDTO saveCategory(CategoryDTO categoryDTO){
@@ -44,6 +47,29 @@ public class CategoryService {
         existingCategory.setIcon(dto.getIcon());
         existingCategory = categoryRepository.save(existingCategory);
         return toDTO(existingCategory);
+    }
+
+    public boolean deleteCategory(Long categoryId){
+        try {
+            ProfileEntity profile = profileService.getCurrentProfile();
+            CategoryEntity category = categoryRepository.findByIdAndProfileId(categoryId, profile.getId())
+                    .orElseThrow(() -> new RuntimeException("No category found."));
+
+            List<CertificateEntity> certsOfThisCategory = certificateRepository.findByProfileIdAndCategoryId(profile.getId(), categoryId)
+                    .orElseThrow(() -> new RuntimeException("No certificates found for this category."));
+
+            if (certsOfThisCategory.isEmpty()) {
+                categoryRepository.delete(category);
+                System.out.println(category.getName() + " is deleted.");
+                return true;
+            }
+        }
+        catch(Exception e){
+            System.out.println("Cannot delete a property as certificates exists for this category.");
+            System.err.println(e.getMessage());
+            return false;
+        }
+        return false;
     }
 
     // helper methods

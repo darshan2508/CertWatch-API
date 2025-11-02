@@ -15,7 +15,7 @@ import java.util.Date;
 public class DetailsDTO {
     private String subject;
     private String issuer;
-    private BigInteger serialNumber;
+    private String serialNumber;
     private Date validFrom;
     private Date validTo;
     private int version;

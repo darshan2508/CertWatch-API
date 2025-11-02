@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Data
 @NoArgsConstructor
@@ -22,10 +23,11 @@ public class CertificateDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Boolean isActive;
-    private LocalDateTime validFrom;
-    private LocalDateTime validTo;
-    private BigInteger serialNumber;
+    private Date validFrom;
+    private Date validTo;
+    private String serialNumber;
     private int version;
     private String subject;
     private String issuer;
+    private String commonName;
 }
