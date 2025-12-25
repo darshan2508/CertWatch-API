@@ -7,9 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigInteger;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Data
 @NoArgsConstructor
@@ -19,15 +18,16 @@ public class CertificateDTO {
 
     private Long id;
     private Long categoryId;
-    private String categoryName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Boolean isActive;
-    private Date validFrom;
-    private Date validTo;
+    private Boolean isArchived;
+    private LocalDate issuedDate;
+    private LocalDate expiryDate;
     private String serialNumber;
     private int version;
     private String subject;
-    private String issuer;
-    private String commonName;
+    private String issuedBy;
+    private String subjectAltName;
+    private String comments;
+    private String signatureAlgorithm;
 }

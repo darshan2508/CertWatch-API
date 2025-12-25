@@ -5,8 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigInteger;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
@@ -14,9 +13,11 @@ import java.util.Date;
 @Builder
 public class DetailsDTO {
     private String subject;
-    private String issuer;
+    private String issuedBy;
     private String serialNumber;
-    private Date validFrom;
-    private Date validTo;
+    private LocalDate issuedDate;
+    private LocalDate expiryDate;
     private int version;
+    private String signatureAlgorithm;
+    private String subjectAltName;
 }

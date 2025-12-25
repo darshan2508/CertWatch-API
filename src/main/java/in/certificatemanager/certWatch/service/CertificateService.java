@@ -48,22 +48,41 @@ public class CertificateService {
         ProfileEntity profile = profileService.getCurrentProfile();
         CategoryEntity category = categoryRepository.findById(certDto.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Category not found."));
+
         CertificateEntity newCert = toEntity(certDto, profile, category);
         newCert = certificateRepository.save(newCert);
+        System.out.println("Certificate added successfully.");
+        System.out.println(newCert);
         return toDTO(newCert);
     }
 
-    public List<CertificateDTO> getAllCertificatesForCurrentUser(){
+    public List<CertificateDTO>  getAllCertificatesForCurrentUser(){
         ProfileEntity profile = profileService.getCurrentProfile();
-        List<CertificateEntity> certificates = certificateRepository.findByProfileId(profile.getId())
-                .orElseThrow(() -> new RuntimeException("No certificates found"));
+        List<CertificateEntity> certificates = certificateRepository.findByProfileId(profile.getId());
+        return certificates.stream().map(this::toDTO).toList();
+    }
+
+    public List<CertificateDTO> getUnarchivedCertificatesForCurrentUser(){
+        ProfileEntity profile = profileService.getCurrentProfile();
+        List<CertificateEntity> certificates = certificateRepository.findByProfileIdAndIsArchivedFalse(profile.getId());
+        return certificates.stream().map(this::toDTO).toList();
+    }
+
+    public List<CertificateDTO> getUnarchivedCertificatesForAnyUser(ProfileEntity profile){
+        List<CertificateEntity> certificates = certificateRepository.findByProfileIdAndIsArchivedFalse(profile.getId());
+        return certificates.stream().map(this::toDTO).toList();
+    }
+
+    public List<CertificateDTO> getAllArchivedCertificatesForCurrentUser(){
+        ProfileEntity profile = profileService.getCurrentProfile();
+        List<CertificateEntity> certificates = certificateRepository.findByProfileIdAndIsArchivedTrue(profile.getId());
+
         return certificates.stream().map(this::toDTO).toList();
     }
 
     // To update a particular certificate
     public CertificateDTO updateCertificate(Long certificateId, CertificateDTO certDto){
         ProfileEntity profile = profileService.getCurrentProfile();
-
 
         CertificateEntity existingCert = certificateRepository.findByIdAndProfileId(certificateId, profile.getId())
                 .orElseThrow(() -> new RuntimeException("Certificate not found or not accessible."));
@@ -75,13 +94,17 @@ public class CertificateService {
             existingCert.setCategory(newCategory);
         }
 
-        if(certDto.getCommonName() != null) existingCert.setCommonName(certDto.getCommonName());
-        if(certDto.getValidFrom() != null) existingCert.setValidFrom(certDto.getValidFrom());
-        if(certDto.getValidTo() != null) existingCert.setValidTo(certDto.getValidTo());
+        if(certDto.getIssuedDate() != null) existingCert.setIssuedDate(certDto.getIssuedDate());
+        if(certDto.getExpiryDate() != null) existingCert.setExpiryDate(certDto.getExpiryDate());
         if(certDto.getVersion() != 0) existingCert.setVersion(certDto.getVersion());
         if(certDto.getSerialNumber() != null) existingCert.setSerialNumber(certDto.getSerialNumber());
         if(certDto.getSubject() != null) existingCert.setSubject(certDto.getSubject());
-        if(certDto.getIssuer() != null)existingCert.setIssuer(certDto.getIssuer());
+        if(certDto.getIssuedBy() != null) existingCert.setIssuedBy(certDto.getIssuedBy());
+        if(certDto.getSubjectAltName() != null) existingCert.setSubjectAltName(certDto.getSubjectAltName());
+        if(certDto.getSignatureAlgorithm() != null) existingCert.setSignatureAlgorithm(certDto.getSignatureAlgorithm());
+        if(certDto.getComments() != null) existingCert.setComments(certDto.getComments());
+        if(certDto.getIsArchived() != null) existingCert.setIsArchived(certDto.getIsArchived());
+
         existingCert = certificateRepository.save(existingCert);
         return toDTO(existingCert);
     }
@@ -95,13 +118,13 @@ public class CertificateService {
             throw new RuntimeException("Unauthorized to delete this certificate.");
         }
 
-        DeletedCertificateEntity oldCert = toDeletedCertEntity(cert, profile,cert.getCategory());
-
         try{
+            DeletedCertificateEntity oldCert = toDeletedCertEntity(cert, profile);
+            System.out.println("Deleted cert -> "+oldCert);
             deletedCertificateRepository.save(oldCert);
             certificateRepository.delete(cert);
-        }catch(Exception e) {
-            System.err.println("Unable to save certificate in deleted folder and deleting from original folder."+e.getMessage());
+        }catch(Exception e){
+            System.err.println("Unable to save certificate in deleted folder"+e.getMessage());
         }
     }
 
@@ -110,27 +133,31 @@ public class CertificateService {
     private CertificateEntity toEntity(CertificateDTO dto, ProfileEntity profile, CategoryEntity category){
         return CertificateEntity.builder()
                 .subject(dto.getSubject())
-                .commonName(dto.getCommonName())
-                .validFrom(dto.getValidFrom())
-                .validTo(dto.getValidTo())
+                .issuedBy(dto.getIssuedBy())
+                .issuedDate(dto.getIssuedDate())
+                .expiryDate(dto.getExpiryDate())
                 .version(dto.getVersion())
                 .serialNumber(dto.getSerialNumber())
-                .issuer(dto.getIssuer())
+                .signatureAlgorithm(dto.getSignatureAlgorithm())
+                .subjectAltName(dto.getSubjectAltName())
+                .comments(dto.getComments())
+                .isArchived(false)
                 .profile(profile)
                 .category(category)
                 .build();
     }
 
-    private DeletedCertificateEntity toDeletedCertEntity(CertificateEntity cert,ProfileEntity profile,CategoryEntity category){
+    private DeletedCertificateEntity toDeletedCertEntity(CertificateEntity cert,ProfileEntity profile){
         return DeletedCertificateEntity.builder()
                 .id(cert.getId())
                 .subject(cert.getSubject())
-                .commonName(cert.getCommonName())
-                .validFrom(cert.getValidFrom())
-                .validTo(cert.getValidTo())
+                .issuedBy(cert.getIssuedBy())
+                .issuedDate(cert.getIssuedDate())
+                .expiryDate(cert.getExpiryDate())
                 .version(cert.getVersion())
                 .serialNumber(cert.getSerialNumber())
-                .issuer(cert.getIssuer())
+                .signatureAlgorithm(cert.getSignatureAlgorithm())
+                .subjectAltName(cert.getSubjectAltName())
                 .profile(profile)
                 .build();
     }
@@ -139,16 +166,18 @@ public class CertificateService {
         return CertificateDTO.builder()
                 .id(entity.getId())
                 .categoryId(entity.getCategory() != null ? entity.getCategory().getId() : null)
-                .categoryName(entity.getCategory() != null ? entity.getCategory().getName() : "N/A")
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .subject(entity.getSubject())
-                .validFrom(entity.getValidFrom())
-                .validTo(entity.getValidTo())
+                .issuedDate(entity.getIssuedDate())
+                .expiryDate(entity.getExpiryDate())
                 .version(entity.getVersion())
                 .serialNumber(entity.getSerialNumber())
-                .issuer(entity.getIssuer())
-                .commonName(entity.getCommonName())
+                .issuedBy(entity.getIssuedBy())
+                .signatureAlgorithm(entity.getSignatureAlgorithm())
+                .isArchived(entity.getIsArchived())
+                .subjectAltName(entity.getSubjectAltName())
+                .comments(entity.getComments())
                 .build();
 
     }

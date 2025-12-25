@@ -39,8 +39,20 @@ public class CertificateController {
 
     @GetMapping
     public ResponseEntity<List<CertificateDTO>> getCertificates(){
+        List<CertificateDTO> certs = certificateService.getUnarchivedCertificatesForCurrentUser();
+        return ResponseEntity.ok(certs);
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<CertificateDTO>> getAllCertificatesForCurrentUser(){
         List<CertificateDTO> certs = certificateService.getAllCertificatesForCurrentUser();
         return ResponseEntity.ok(certs);
+    }
+
+    @GetMapping("/archived")
+    public ResponseEntity<List<CertificateDTO>> getArchivedCertificates(){
+        List<CertificateDTO> certificates = certificateService.getAllArchivedCertificatesForCurrentUser();
+        return ResponseEntity.ok(certificates);
     }
 
     @PutMapping("/{certificateId}")

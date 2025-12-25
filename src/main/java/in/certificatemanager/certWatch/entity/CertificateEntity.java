@@ -8,10 +8,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @Table(name="tbl_certificates")
@@ -23,7 +21,19 @@ public class CertificateEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private LocalDate date;
+
+    private String subject;
+    private String issuedBy;
+
+    private String serialNumber;
+    private int version;
+    private String signatureAlgorithm;
+
+    private LocalDate issuedDate;
+    private LocalDate expiryDate;
+
+    private String subjectAltName;
+    private String comments;
 
     @Column(updatable = false)
     @CreationTimestamp
@@ -32,19 +42,7 @@ public class CertificateEntity {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    private Boolean isActive;
-
-    private Date validFrom;
-    private Date validTo;
-
-    private String serialNumber;
-
-    private int version;
-
-    private String subject;
-    private String issuer;
-    private String commonName;
-
+    private Boolean isArchived = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_id", nullable = false)

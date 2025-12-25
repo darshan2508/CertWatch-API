@@ -8,11 +8,15 @@ import java.util.Optional;
 
 public interface CertificateRepository extends JpaRepository<CertificateEntity, Long> {
 
-    List<CertificateEntity> findByProfileIdOrderByDateDesc(Long profileId);
+//    List<CertificateEntity> findByProfileIdOrderByDateDesc(Long profileId);
+//
+//    List<CertificateEntity> findTop5ByProfileIdOrderByDateDesc(Long profileID);
+//
+    List<CertificateEntity> findByProfileId(Long profileId);
 
-    List<CertificateEntity> findTop5ByProfileIdOrderByDateDesc(Long profileID);
+    List<CertificateEntity> findByProfileIdAndIsArchivedTrue(Long profileId);
 
-    Optional<List<CertificateEntity>> findByProfileId(Long profileId);
+    List<CertificateEntity> findByProfileIdAndIsArchivedFalse(Long profileId);
 
     Optional<CertificateEntity> findByIdAndProfileId(Long certificateId, Long profileId);
 
