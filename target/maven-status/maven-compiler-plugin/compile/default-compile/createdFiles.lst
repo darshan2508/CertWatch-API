@@ -37,4 +37,5 @@ in\certificatemanager\certWatch\service\ExcelService.class
 in\certificatemanager\certWatch\config\SecurityConfig.class
 in\certificatemanager\certWatch\util\CertParsingUtil.class
 in\certificatemanager\certWatch\repository\CertificateRepository.class
+in\certificatemanager\certWatch\service\HealthCheckCronService.class
 in\certificatemanager\certWatch\service\CategoryService.class

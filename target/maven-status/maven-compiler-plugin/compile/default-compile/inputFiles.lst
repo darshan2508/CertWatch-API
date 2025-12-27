@@ -24,6 +24,7 @@ E:\certWatch\certWatch\src\main\java\in\certificatemanager\certWatch\service\Cat
 E:\certWatch\certWatch\src\main\java\in\certificatemanager\certWatch\service\CertificateService.java
 E:\certWatch\certWatch\src\main\java\in\certificatemanager\certWatch\service\EmailService.java
 E:\certWatch\certWatch\src\main\java\in\certificatemanager\certWatch\service\ExcelService.java
+E:\certWatch\certWatch\src\main\java\in\certificatemanager\certWatch\service\HealthCheckCronService.java
 E:\certWatch\certWatch\src\main\java\in\certificatemanager\certWatch\service\NotificationService.java
 E:\certWatch\certWatch\src\main\java\in\certificatemanager\certWatch\service\ProfileService.java
 E:\certWatch\certWatch\src\main\java\in\certificatemanager\certWatch\util\CertParsingUtil.java
