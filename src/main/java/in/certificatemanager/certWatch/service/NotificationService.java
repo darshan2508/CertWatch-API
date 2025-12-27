@@ -152,7 +152,7 @@ public class NotificationService {
         return html.toString();
     }
 
-    @Scheduled(cron = "0 0 8 * * *", zone = "IST")
+    @Scheduled(cron = "0 25 11 * * *", zone = "IST")
     public void sendDailyExpiryReminder(){
         log.info("Job started: sendDailyExpiryReminder()");
         List<ProfileEntity> profiles = profileRepository.findAll();
@@ -163,6 +163,7 @@ public class NotificationService {
             String body = dailyEmailTemplate(profile.getFullName(),tableData.get(0),tableData.get(1),tableData.get(2));
             emailService.sendEmail(profile.getEmail(),"Daily reminder to check expiring certificates", body);
         }
+        log.info("Job ended: sendDailyExpiryReminder()");
     }
 
 
