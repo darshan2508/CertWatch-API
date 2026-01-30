@@ -40,22 +40,19 @@ public class CertificateController {
     @GetMapping("/all")
     public ResponseEntity<List<CertificateDTO>> getCertificates(){
         List<CertificateDTO> certs = certificateService.getAllCertificatesForCurrentUser();
-        if(!certs.isEmpty()) return ResponseEntity.ok(certs);
-        throw new ResourceNotFoundException("No certificates found.");
+        return ResponseEntity.ok(certs);
     }
 
     @GetMapping("/unarchived")
     public ResponseEntity<List<CertificateDTO>> getUnarchivedCertificates(){
         List<CertificateDTO> certs = certificateService.getUnarchivedCertificatesForCurrentUser();
-        if(!certs.isEmpty()) return ResponseEntity.ok(certs);
-        throw new ResourceNotFoundException("No certificates found.");
+        return ResponseEntity.ok(certs);
     }
 
     @GetMapping("/archived")
     public ResponseEntity<List<CertificateDTO>> getArchivedCertificates(){
         List<CertificateDTO> certificates = certificateService.getArchivedCertificatesForCurrentUser();
-        if(!certificates.isEmpty()) return ResponseEntity.ok(certificates);
-        throw new ResourceNotFoundException("No certificates found.");
+        return ResponseEntity.ok(certificates);
     }
 
     @PutMapping("/id/{certificateId}")
