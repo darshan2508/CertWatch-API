@@ -5,6 +5,10 @@ E:\certWatch\certWatch\src\main\java\in\certificatemanager\certWatch\controller\
 E:\certWatch\certWatch\src\main\java\in\certificatemanager\certWatch\controller\ExcelController.java
 E:\certWatch\certWatch\src\main\java\in\certificatemanager\certWatch\controller\HomeController.java
 E:\certWatch\certWatch\src\main\java\in\certificatemanager\certWatch\controller\ProfileController.java
+E:\certWatch\certWatch\src\main\java\in\certificatemanager\certWatch\customExceptions\GlobalExceptionHandler.java
+E:\certWatch\certWatch\src\main\java\in\certificatemanager\certWatch\customExceptions\InvalidCertificateFormatException.java
+E:\certWatch\certWatch\src\main\java\in\certificatemanager\certWatch\customExceptions\ResourceInUseException.java
+E:\certWatch\certWatch\src\main\java\in\certificatemanager\certWatch\customExceptions\ResourceNotFoundException.java
 E:\certWatch\certWatch\src\main\java\in\certificatemanager\certWatch\dto\AuthDTO.java
 E:\certWatch\certWatch\src\main\java\in\certificatemanager\certWatch\dto\CategoryDTO.java
 E:\certWatch\certWatch\src\main\java\in\certificatemanager\certWatch\dto\CertificateDTO.java

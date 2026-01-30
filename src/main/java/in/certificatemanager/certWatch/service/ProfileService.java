@@ -6,6 +6,7 @@ import in.certificatemanager.certWatch.entity.ProfileEntity;
 import in.certificatemanager.certWatch.repository.ProfileRepository;
 import in.certificatemanager.certWatch.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,6 +21,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProfileService {
 
     private final ProfileRepository profileRepository;
@@ -41,6 +43,7 @@ public class ProfileService {
         String subject = "Activate your CertWatch account";
         String body = "Click on the following link to activate your account: " + activationLink;
         emailService.sendEmail(newProfile.getEmail(), subject, body);
+
         return toDTO(newProfile);
     }
 
@@ -48,7 +51,7 @@ public class ProfileService {
         return ProfileEntity.builder()
                 .id(profileDTO.getId())
                 .fullName(profileDTO.getFullName())
-                .email(profileDTO.getEmail())
+                .email(profileDTO.getEmail().toLowerCase())
                 .password(passwordEncoder.encode(profileDTO.getPassword()))
                 .createdAt(profileDTO.getCreatedAt())
                 .updatedAt(profileDTO.getUpdatedAt())
@@ -76,7 +79,7 @@ public class ProfileService {
     }
 
     public boolean isAccountActive(String email){
-        return profileRepository.findByEmail(email)
+        return profileRepository.findByEmail(email.toLowerCase())
                 .map(ProfileEntity::getIsActive)
                 .orElse(false);
     }

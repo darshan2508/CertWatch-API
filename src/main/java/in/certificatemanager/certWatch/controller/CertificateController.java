@@ -1,5 +1,6 @@
 package in.certificatemanager.certWatch.controller;
 
+import in.certificatemanager.certWatch.customExceptions.ResourceNotFoundException;
 import in.certificatemanager.certWatch.dto.CategoryDTO;
 import in.certificatemanager.certWatch.dto.CertificateDTO;
 import in.certificatemanager.certWatch.dto.DetailsDTO;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -29,39 +31,40 @@ public class CertificateController {
     public ResponseEntity<DetailsDTO> uploadCertificate(@RequestParam(value="file") MultipartFile file) {
         try {
             DetailsDTO details = certificateService.processCertificateFile(file);
-            if(details != null) return ResponseEntity.status(HttpStatus.OK).body(details);
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(null);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(null);
+            return ResponseEntity.status(HttpStatus.OK).body(details);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<CertificateDTO>> getCertificates(){
-        List<CertificateDTO> certs = certificateService.getUnarchivedCertificatesForCurrentUser();
-        return ResponseEntity.ok(certs);
+        List<CertificateDTO> certs = certificateService.getAllCertificatesForCurrentUser();
+        if(!certs.isEmpty()) return ResponseEntity.ok(certs);
+        throw new ResourceNotFoundException("No certificates found.");
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<List<CertificateDTO>> getAllCertificatesForCurrentUser(){
-        List<CertificateDTO> certs = certificateService.getAllCertificatesForCurrentUser();
-        return ResponseEntity.ok(certs);
+    @GetMapping("/unarchived")
+    public ResponseEntity<List<CertificateDTO>> getUnarchivedCertificates(){
+        List<CertificateDTO> certs = certificateService.getUnarchivedCertificatesForCurrentUser();
+        if(!certs.isEmpty()) return ResponseEntity.ok(certs);
+        throw new ResourceNotFoundException("No certificates found.");
     }
 
     @GetMapping("/archived")
     public ResponseEntity<List<CertificateDTO>> getArchivedCertificates(){
-        List<CertificateDTO> certificates = certificateService.getAllArchivedCertificatesForCurrentUser();
-        return ResponseEntity.ok(certificates);
+        List<CertificateDTO> certificates = certificateService.getArchivedCertificatesForCurrentUser();
+        if(!certificates.isEmpty()) return ResponseEntity.ok(certificates);
+        throw new ResourceNotFoundException("No certificates found.");
     }
 
-    @PutMapping("/{certificateId}")
+    @PutMapping("/id/{certificateId}")
     public ResponseEntity<CertificateDTO> updateCategory(@PathVariable Long certificateId, @RequestBody CertificateDTO certificateDto){
         CertificateDTO updatedCertificate = certificateService.updateCertificate(certificateId, certificateDto);
         return ResponseEntity.ok(updatedCertificate);
     }
 
-    @DeleteMapping("/{certificateId}")
+    @DeleteMapping("/id/{certificateId}")
     public ResponseEntity<Void> deleteCertificate(@PathVariable Long certificateId){
         certificateService.deleteCertificate(certificateId);
         return ResponseEntity.noContent().build();

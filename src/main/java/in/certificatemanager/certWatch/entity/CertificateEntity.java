@@ -42,6 +42,7 @@ public class CertificateEntity {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    @Builder.Default
     private Boolean isArchived = false;
 
     @ManyToOne(fetch = FetchType.LAZY)

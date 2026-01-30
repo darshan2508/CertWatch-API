@@ -1,9 +1,11 @@
 in\certificatemanager\certWatch\service\AppUserDetailsService.class
 in\certificatemanager\certWatch\controller\ProfileController.class
+in\certificatemanager\certWatch\customExceptions\InvalidCertificateFormatException.class
 in\certificatemanager\certWatch\dto\AuthDTO.class
 in\certificatemanager\certWatch\entity\CertificateEntity.class
 in\certificatemanager\certWatch\entity\DeletedCertificateEntity$DeletedCertificateEntityBuilder.class
 in\certificatemanager\certWatch\dto\CertificateDTO$CertificateDTOBuilder.class
+in\certificatemanager\certWatch\customExceptions\ResourceNotFoundException.class
 in\certificatemanager\certWatch\controller\ExcelController.class
 in\certificatemanager\certWatch\dto\CategoryDTO.class
 in\certificatemanager\certWatch\dto\CertificateDTO.class
@@ -27,6 +29,8 @@ in\certificatemanager\certWatch\CertWatchApplication.class
 in\certificatemanager\certWatch\entity\CategoryEntity.class
 in\certificatemanager\certWatch\entity\ProfileEntity.class
 in\certificatemanager\certWatch\repository\ProfileRepository.class
+in\certificatemanager\certWatch\customExceptions\GlobalExceptionHandler.class
+in\certificatemanager\certWatch\customExceptions\ResourceInUseException.class
 in\certificatemanager\certWatch\repository\DeletedCertificateRepository.class
 in\certificatemanager\certWatch\controller\CategoryController.class
 in\certificatemanager\certWatch\controller\CertificateController.class
