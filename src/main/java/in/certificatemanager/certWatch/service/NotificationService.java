@@ -152,7 +152,7 @@ public class NotificationService {
         return html.toString();
     }
 
-    @Scheduled(cron = "0 25 11 * * *", zone = "IST")
+    @Scheduled(cron = "0 0 8 * * *", zone = "IST")
     public void sendDailyExpiryReminder(){
         log.info("Job started: sendDailyExpiryReminder()");
         List<ProfileEntity> profiles = profileRepository.findAll();

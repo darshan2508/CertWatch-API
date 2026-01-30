@@ -24,8 +24,7 @@ public class EmailService {
     @Value("${brevo.sender.name}")
     private String fromName;
 
-    private static final String BREVO_URL =
-            "https://api.brevo.com/v3/smtp/email";
+    private static final String BREVO_URL = "https://api.brevo.com/v3/smtp/email";
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -102,30 +101,5 @@ public class EmailService {
         }
     }
 }
-//    public void sendEmail(String to, String subject, String body){
-//        try{
-//            System.out.println("Sending in progress.");
-//            SimpleMailMessage message = new SimpleMailMessage();
-//            message.setFrom(fromEmail);
-//            System.out.println(fromEmail);
-//            message.setTo(to);
-//            message.setSubject(subject);
-//            message.setText(body);
-//            mailSender.send(message);
-//            System.out.println("Mail sent.");
-//        }catch(Exception e){
-//            throw new RuntimeException(e.getMessage());
-//        }
-//    }
-//
-//    public void sendEmailWithAttachment(String to, String subject, String body, byte[] attachment, String filename) throws MessagingException {
-//        MimeMessage message = mailSender.createMimeMessage();
-//        MimeMessageHelper helper = new MimeMessageHelper(message, true);
-//        helper.setFrom(fromEmail);
-//        helper.setTo(to);
-//        helper.setSubject(subject);
-//        helper.setText(body);
-//        helper.addAttachment(filename, new ByteArrayResource(attachment));
-//        mailSender.send(message);
-//    }
+
 

@@ -22,4 +22,6 @@ public interface CertificateRepository extends JpaRepository<CertificateEntity, 
 
     Optional<List<CertificateEntity>> findByProfileIdAndCategoryId(Long profileId,Long categoryId);
 
+    boolean existsByProfileIdAndCategoryId(Long profileId, Long categoryId);
+
 }

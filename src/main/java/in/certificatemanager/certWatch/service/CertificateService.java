@@ -1,5 +1,6 @@
 package in.certificatemanager.certWatch.service;
 
+import in.certificatemanager.certWatch.customExceptions.ResourceNotFoundException;
 import in.certificatemanager.certWatch.dto.CertificateDTO;
 import in.certificatemanager.certWatch.dto.DetailsDTO;
 import in.certificatemanager.certWatch.entity.CategoryEntity;
@@ -11,13 +12,17 @@ import in.certificatemanager.certWatch.repository.CertificateRepository;
 import in.certificatemanager.certWatch.repository.DeletedCertificateRepository;
 import in.certificatemanager.certWatch.util.CertParsingUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.cert.CertificateParsingException;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CertificateService {
@@ -28,18 +33,15 @@ public class CertificateService {
     private final ProfileService profileService;
 
     // To extract text from the certificate file
-    public DetailsDTO processCertificateFile(MultipartFile file){
-        try{
+    public DetailsDTO processCertificateFile(MultipartFile file) throws IOException {
+        try {
             String fileContent = StreamUtils.copyToString(file.getInputStream(), StandardCharsets.UTF_8);
             System.out.println(fileContent);
-            if(fileContent.trim().startsWith("-----BEGIN CERTIFICATE-----")){
-                DetailsDTO certDetails = CertParsingUtil.parseCertificate(fileContent);
-                return certDetails;
-            }
-            System.err.println("****Invalid certificate format****");
-            return null;
-        }catch(Exception e){
-            throw new RuntimeException(e.getMessage());
+            return CertParsingUtil.parseCertificate(fileContent);
+        }catch(IOException e) {
+            throw new IOException(e.getMessage());
+        } catch (CertificateParsingException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -47,12 +49,10 @@ public class CertificateService {
     public CertificateDTO addCertificate(CertificateDTO certDto){
         ProfileEntity profile = profileService.getCurrentProfile();
         CategoryEntity category = categoryRepository.findById(certDto.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found."));
-
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found."));
         CertificateEntity newCert = toEntity(certDto, profile, category);
-        newCert = certificateRepository.save(newCert);
-        System.out.println("Certificate added successfully.");
-        System.out.println(newCert);
+        certificateRepository.save(newCert);
+        log.info("Certificate added successfully -> " + "Certificate details = " + certDto + " , Profile Id = " + profile.getId() + " , Category Id = " + category.getId());
         return toDTO(newCert);
     }
 
@@ -73,10 +73,9 @@ public class CertificateService {
         return certificates.stream().map(this::toDTO).toList();
     }
 
-    public List<CertificateDTO> getAllArchivedCertificatesForCurrentUser(){
+    public List<CertificateDTO> getArchivedCertificatesForCurrentUser(){
         ProfileEntity profile = profileService.getCurrentProfile();
         List<CertificateEntity> certificates = certificateRepository.findByProfileIdAndIsArchivedTrue(profile.getId());
-
         return certificates.stream().map(this::toDTO).toList();
     }
 
@@ -85,12 +84,12 @@ public class CertificateService {
         ProfileEntity profile = profileService.getCurrentProfile();
 
         CertificateEntity existingCert = certificateRepository.findByIdAndProfileId(certificateId, profile.getId())
-                .orElseThrow(() -> new RuntimeException("Certificate not found or not accessible."));
+                .orElseThrow(() -> new ResourceNotFoundException("Certificate not found for id : " + certificateId));
 
         // Fetch CategoryEntity by its ID (from DTO) and assign it
         if(certDto.getCategoryId() != null){
             CategoryEntity newCategory = categoryRepository.findById(certDto.getCategoryId())
-                    .orElseThrow(() -> new RuntimeException("Category not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("No category found with id : " + certDto.getCategoryId()));
             existingCert.setCategory(newCategory);
         }
 
@@ -105,26 +104,23 @@ public class CertificateService {
         if(certDto.getComments() != null) existingCert.setComments(certDto.getComments());
         if(certDto.getIsArchived() != null) existingCert.setIsArchived(certDto.getIsArchived());
 
-        existingCert = certificateRepository.save(existingCert);
+        certificateRepository.save(existingCert);
+        log.info("Certificate updated [id={}, profileId={}]", certificateId, profile.getId());
         return toDTO(existingCert);
     }
 
     public void deleteCertificate(Long certificateId){
         ProfileEntity profile = profileService.getCurrentProfile();
         CertificateEntity cert = certificateRepository.findByIdAndProfileId(certificateId, profile.getId())
-                .orElseThrow(() -> new RuntimeException("Certificate not found"));
-
-        if(!cert.getProfile().getId().equals(profile.getId())){
-            throw new RuntimeException("Unauthorized to delete this certificate.");
-        }
+                .orElseThrow(() -> new ResourceNotFoundException("Certificate not found for id : " + certificateId));
 
         try{
             DeletedCertificateEntity oldCert = toDeletedCertEntity(cert, profile);
-            System.out.println("Deleted cert -> "+oldCert);
+            log.info("Certificate deleted with id : {}",certificateId);
             deletedCertificateRepository.save(oldCert);
             certificateRepository.delete(cert);
         }catch(Exception e){
-            System.err.println("Unable to save certificate in deleted folder"+e.getMessage());
+            log.error("Unable to delete certificate",e);
         }
     }
 

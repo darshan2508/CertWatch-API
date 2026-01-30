@@ -1,16 +1,20 @@
 package in.certificatemanager.certWatch.service;
 
+import in.certificatemanager.certWatch.customExceptions.ResourceInUseException;
+import in.certificatemanager.certWatch.customExceptions.ResourceNotFoundException;
 import in.certificatemanager.certWatch.dto.CategoryDTO;
 import in.certificatemanager.certWatch.entity.CategoryEntity;
-import in.certificatemanager.certWatch.entity.CertificateEntity;
 import in.certificatemanager.certWatch.entity.ProfileEntity;
 import in.certificatemanager.certWatch.repository.CategoryRepository;
 import in.certificatemanager.certWatch.repository.CertificateRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CategoryService {
@@ -23,53 +27,66 @@ public class CategoryService {
     public CategoryDTO saveCategory(CategoryDTO categoryDTO){
         ProfileEntity profile = profileService.getCurrentProfile();
         if(categoryRepository.existsByNameAndProfileId(categoryDTO.getName(),profile.getId())){
-            throw new RuntimeException("Category with this name already exists.");
+            log.info("Category with the name [" + categoryDTO.getName() + "] already exists.");
+            throw new ResourceInUseException("Category with the name [" + categoryDTO.getName() + "] already exists.");
+        }else{
+            CategoryEntity newCategory = toEntity(categoryDTO, profile);
+            newCategory = categoryRepository.save(newCategory);
+            return toDTO(newCategory);
         }
-
-        CategoryEntity newCategory = toEntity(categoryDTO, profile);
-        newCategory = categoryRepository.save(newCategory);
-
-        return toDTO(newCategory);
     }
 
     // get categories for current user
     public List<CategoryDTO> getCategoriesForCurrentUser(){
         ProfileEntity profile = profileService.getCurrentProfile();
         List<CategoryEntity> categories = categoryRepository.findByProfileId(profile.getId());
+        if(categories.isEmpty()) log.info("No categories found for the user - " + profile.getId());
         return categories.stream().map(this::toDTO).toList();
     }
 
     public CategoryDTO updateCategory(Long categoryId, CategoryDTO dto){
         ProfileEntity profile = profileService.getCurrentProfile();
-        CategoryEntity existingCategory = categoryRepository.findByIdAndProfileId(categoryId, profile.getId())
-                .orElseThrow(() -> new RuntimeException("Category not found or is not accessible."));
-        existingCategory.setName(dto.getName());
-        existingCategory.setIcon(dto.getIcon());
-        existingCategory = categoryRepository.save(existingCategory);
-        return toDTO(existingCategory);
+
+        // Find the category with the id mentioned in the request
+        CategoryEntity existingCategory = categoryRepository
+                .findByIdAndProfileId(categoryId, profile.getId())
+                .orElseThrow(() -> {
+                    log.info("No category is found for category Id - " + categoryId);
+                    return new ResourceNotFoundException("Category not found");
+                });
+
+        // Check if any category already exists with the name provided in the request
+        if(categoryRepository.existsByNameAndProfileId(dto.getName(),profile.getId())){
+            log.info("Category with the name [" + dto.getName() + "] already exists.");
+            throw new ResourceInUseException("Category with the name [" + dto.getName() + "] already exists.");
+        }else{
+            existingCategory.setName(dto.getName());
+            existingCategory.setIcon(dto.getIcon());
+            existingCategory = categoryRepository.save(existingCategory);
+            log.info("Category details updated for category Id - " + categoryId);
+            return toDTO(existingCategory);
+        }
     }
 
-    public boolean deleteCategory(Long categoryId){
-        try {
-            ProfileEntity profile = profileService.getCurrentProfile();
-            CategoryEntity category = categoryRepository.findByIdAndProfileId(categoryId, profile.getId())
-                    .orElseThrow(() -> new RuntimeException("No category found."));
+    public void deleteCategory(Long categoryId){
 
-            List<CertificateEntity> certsOfThisCategory = certificateRepository.findByProfileIdAndCategoryId(profile.getId(), categoryId)
-                    .orElseThrow(() -> new RuntimeException("No certificates found for this category."));
+        ProfileEntity profile = profileService.getCurrentProfile();
+        CategoryEntity category = categoryRepository
+                .findByIdAndProfileId(categoryId, profile.getId())
+                .orElseThrow(() -> {
+                    log.info("No category is found for category Id - " + categoryId);
+                    return new ResourceNotFoundException("Category not found");
+                });
 
-            if (certsOfThisCategory.isEmpty()) {
-                categoryRepository.delete(category);
-                System.out.println(category.getName() + " is deleted.");
-                return true;
-            }
+        boolean hasCertificates = certificateRepository
+                .existsByProfileIdAndCategoryId(profile.getId(), categoryId);
+
+        if (!hasCertificates) {
+            categoryRepository.delete(category);
+            log.info("Category => "+category.getName() + " is deleted.");
+        }else{
+            throw new ResourceInUseException("Category contains certificates. Delete them first.");
         }
-        catch(Exception e){
-            System.out.println("Cannot delete a property as certificates exists for this category.");
-            System.err.println(e.getMessage());
-            return false;
-        }
-        return false;
     }
 
     // helper methods
