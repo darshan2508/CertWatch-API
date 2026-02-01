@@ -45,6 +45,17 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
+            String origin = "";
+            if(request.getHeader("origin") != null){
+                origin = request.getHeader("origin");
+                response.setHeader("Access-Control-Allow-Origin", origin);
+            }
+            if(origin.isEmpty()){
+                response.setHeader("Access-Control-Allow-Origin", "*");
+            }
+            response.setHeader("Access-Control-Allow-Credentials", "true");
+            response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, PATCH, OPTIONS, DELETE");
+            response.setHeader("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization");
             filterChain.doFilter(request, response);
         }catch (ExpiredJwtException ex) {
             SecurityContextHolder.clearContext();

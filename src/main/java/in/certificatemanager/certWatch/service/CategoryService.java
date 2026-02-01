@@ -108,6 +108,4 @@ public class CategoryService {
                 .updatedAt(entity.getUpdatedAt())
                 .build();
     }
-
-
 }
