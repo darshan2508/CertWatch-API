@@ -7,6 +7,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,6 +24,16 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     private final UserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return HttpMethod.OPTIONS.matches(request.getMethod())
+                || request.getRequestURI().equals("/login")
+                || request.getRequestURI().equals("/register")
+                || request.getRequestURI().equals("/health")
+                || request.getRequestURI().equals("/activate");
+    }
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -45,24 +56,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
-            String origin = "";
-            if(request.getHeader("origin") != null){
-                origin = request.getHeader("origin");
-                response.setHeader("Access-Control-Allow-Origin", origin);
-            }
-            if(origin.isEmpty()){
-                response.setHeader("Access-Control-Allow-Origin", "*");
-            }
-            response.setHeader("Access-Control-Allow-Credentials", "true");
-            response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, PATCH, OPTIONS, DELETE");
-            response.setHeader("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization");
+
             filterChain.doFilter(request, response);
         }catch (ExpiredJwtException ex) {
             SecurityContextHolder.clearContext();
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.setContentType("application/json");
-            response.getWriter()
-                    .write("{\"error\":\"JWT token has expired\"}");
+            throw ex;
         }
     }
 }
