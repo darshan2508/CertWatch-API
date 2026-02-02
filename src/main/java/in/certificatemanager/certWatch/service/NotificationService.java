@@ -44,11 +44,11 @@ public class NotificationService {
 
             if(daysLeft < 0) continue;
 
-            if(daysLeft <= 30){
+            if(daysLeft == 30){
                 expiringIn30.add(entry);
-            }else if(daysLeft <= 60){
+            }else if(daysLeft == 60){
                 expiringIn60.add(entry);
-            }else if(daysLeft <= 90){
+            }else if(daysLeft == 90){
                 expiringIn90.add(entry);
             }
         }
@@ -125,13 +125,20 @@ public class NotificationService {
         """);
 
         // ===== Tables =====
-        appendTable(html, "Expiring in 30 Days", expiringIn30);
-        appendTable(html, "Expiring in 60 Days", expiringIn60);
-        appendTable(html, "Expiring in 90 Days", expiringIn90);
+        // Only if the list is non-empty, the table will be added to the email.
+        if(!expiringIn30.isEmpty()) appendTable(html, "Expiring in 30 Days", expiringIn30);
+        if(!expiringIn60.isEmpty()) appendTable(html, "Expiring in 60 Days", expiringIn60);
+        if(!expiringIn90.isEmpty()) appendTable(html, "Expiring in 90 Days", expiringIn90);
 
         // ===== Footer =====
         html.append("""
-            <p style="font-size:13px; color:#777; margin-top:30px;">
+                <p style="font-size:13px; color:#555; margin-top:10px;">
+              You can visit <a href="https://cert-watch-zeta.vercel.app">Cert Watch</a> for more information about the certificates.
+            </p>
+                """);
+
+        html.append("""
+            <p style="font-size:13px; color:#777; margin-top:10px;">
               Please take necessary action to renew or replace certificates
               before they expire.
             </p>
@@ -160,8 +167,15 @@ public class NotificationService {
         for(ProfileEntity profile : profiles){
             List<CertificateDTO> allCertificates = certificateService.getUnarchivedCertificatesForAnyUser(profile);
             List<List<ExpiryEntry>> tableData = listsOfExpiringCerts(allCertificates);
-            String body = dailyEmailTemplate(profile.getFullName(),tableData.get(0),tableData.get(1),tableData.get(2));
-            emailService.sendEmail(profile.getEmail(),"Daily reminder to check expiring certificates", body);
+
+            // If there are no expiring certificates, then no email will be sent.
+            if(!(tableData.get(0).isEmpty() && tableData.get(1).isEmpty() && tableData.get(2).isEmpty()))
+            {
+                String body = dailyEmailTemplate(profile.getFullName(),tableData.get(0),tableData.get(1),tableData.get(2));
+                emailService.sendEmail(profile.getEmail(),"A friendly reminder to check expiring certificates", body);
+                log.info("Email successfully sent to {}", profile.getEmail());
+            }
+
         }
         log.info("Job ended: sendDailyExpiryReminder()");
     }

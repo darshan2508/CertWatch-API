@@ -36,7 +36,6 @@ public class CertificateService {
     public DetailsDTO processCertificateFile(MultipartFile file) throws IOException {
         try {
             String fileContent = StreamUtils.copyToString(file.getInputStream(), StandardCharsets.UTF_8);
-            System.out.println(fileContent);
             return CertParsingUtil.parseCertificate(fileContent);
         }catch(IOException e) {
             throw new IOException(e.getMessage());
