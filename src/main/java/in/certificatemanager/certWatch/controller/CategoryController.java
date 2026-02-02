@@ -37,10 +37,16 @@ public class CategoryController {
     }
 
 
-    @DeleteMapping("/id/{categoryId}")
-    public ResponseEntity<String> deleteCategory(@PathVariable Long categoryId){
+//    @DeleteMapping("/id/{categoryId}")
+//    public ResponseEntity<String> deleteCategory(@PathVariable Long categoryId){
+//        categoryService.deleteCategory(categoryId);
+//        return ResponseEntity.ok("Category deleted successfully.");
+//    }
+
+      @DeleteMapping("/id/{categoryId}")
+      public ResponseEntity<Void> deleteCategory(@PathVariable Long categoryId){
         categoryService.deleteCategory(categoryId);
-        return ResponseEntity.ok("Category deleted successfully.");
-    }
+        return ResponseEntity.noContent().build();
+      }
 
 }
